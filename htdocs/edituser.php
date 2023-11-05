@@ -15,7 +15,7 @@
  * @since               2.0.0
  */
 
-/* @var XoopsAvatarHandler $avt_handler */
+/** @var XoopsAvatarHandler $avt_handler */
 
 include __DIR__ . '/mainfile.php';
 
@@ -34,10 +34,10 @@ if (!is_object($xoopsUser)) {
 
 // initialize $op variable
 $op = XoopsRequest::getCmd('op', 'editprofile');
-/* @var XoopsConfigHandler $config_handler */
+/** @var XoopsConfigHandler $config_handler */
 $config_handler  = xoops_getHandler('config');
 $xoopsConfigUser = $config_handler->getConfigsByCat(XOOPS_CONF_USER);
-$myts            = MyTextSanitizer::getInstance();
+$myts            = \MyTextSanitizer::getInstance();
 if ($op === 'saveuser') {
     if (!$GLOBALS['xoopsSecurity']->check()) {
         redirect_header('index.php', 3, _US_NOEDITRIGHT . '<br>' . implode('<br>', $GLOBALS['xoopsSecurity']->getErrors()));
@@ -73,7 +73,7 @@ if ($op === 'saveuser') {
         echo '</div><br>';
         $op = 'editprofile';
     } else {
-        /* @var XoopsMemberHandler $member_handler */
+        /** @var XoopsMemberHandler $member_handler */
         $member_handler = xoops_getHandler('member');
         $edituser       = $member_handler->getUser($uid);
         $edituser->setVar('name', XoopsRequest::getString('name', ''));
@@ -123,18 +123,17 @@ if ($op === 'editprofile') {
     $form->addElement($uname_label);
     $name_text = new XoopsFormText(_US_REALNAME, 'name', 30, 60, $xoopsUser->getVar('name', 'E'));
     $form->addElement($name_text);
-    $email_tray = new XoopsFormElementTray(_US_EMAIL, '<br>');
     if ($xoopsConfigUser['allow_chgmail'] == 1) {
-        $email_text = new XoopsFormText('', 'email', 30, 60, $xoopsUser->getVar('email'));
+        $email_text = new XoopsFormText(_US_EMAIL, 'email', 30, 60, $xoopsUser->getVar('email'));
+        $form->addElement($email_text, true);
     } else {
-        $email_text = new XoopsFormLabel('', $xoopsUser->getVar('email'));
+        $email_text = new XoopsFormLabel(_US_EMAIL, $xoopsUser->getVar('email'));
+        $form->addElement($email_text);
     }
-    $email_tray->addElement($email_text);
     $email_cbox_value = $xoopsUser->user_viewemail() ? 1 : 0;
     $email_cbox       = new XoopsFormCheckBox('', 'user_viewemail', $email_cbox_value);
     $email_cbox->addOption(1, _US_ALLOWVIEWEMAIL);
-    $email_tray->addElement($email_cbox);
-    $form->addElement($email_tray);
+    $form->addElement($email_cbox);
     $url_text = new XoopsFormText(_US_WEBSITE, 'url', 30, 100, $xoopsUser->getVar('url', 'E'));
     $form->addElement($url_text);
 
@@ -208,9 +207,6 @@ if ($op === 'editprofile') {
     $form->addElement($op_hidden);
     //$form->addElement($token_hidden);
     $form->addElement($submit_button);
-    if ($xoopsConfigUser['allow_chgmail'] == 1) {
-        $form->setRequired($email_text);
-    }
     $form->display();
     include $GLOBALS['xoops']->path('footer.php');
 }
@@ -263,7 +259,7 @@ if ($op === 'avatarupload') {
     }
     $xoops_upload_file = array();
     $uid               = 0;
-    if (!empty($_POST['xoops_upload_file']) && is_array($_POST['xoops_upload_file'])) {
+    if (!empty($_POST['xoops_upload_file']) && \is_array($_POST['xoops_upload_file'])) {
         $xoops_upload_file = $_POST['xoops_upload_file'];
     }
     if (!empty($_POST['uid'])) {
@@ -328,6 +324,7 @@ if ($op === 'avatarchoose') {
         redirect_header('index.php', 3, _US_NOEDITRIGHT);
     }
     $user_avatar = '';
+    /** @var \XoopsAvatarHandler $avt_handler */
     $avt_handler = xoops_getHandler('avatar');
     if (!empty($_POST['user_avatar'])) {
         $user_avatar     = $myts->addSlashes(trim($_POST['user_avatar']));
@@ -343,7 +340,7 @@ if ($op === 'avatarchoose') {
     if (0 === strpos($user_avatarpath, realpath(XOOPS_UPLOAD_PATH)) && is_file($user_avatarpath)) {
         $oldavatar = $xoopsUser->getVar('user_avatar');
         $xoopsUser->setVar('user_avatar', $user_avatar);
-        /* @var XoopsMemberHandler $member_handler */
+        /** @var XoopsMemberHandler $member_handler */
         $member_handler = xoops_getHandler('member');
         if (!$member_handler->insertUser($xoopsUser)) {
             include $GLOBALS['xoops']->path('header.php');
